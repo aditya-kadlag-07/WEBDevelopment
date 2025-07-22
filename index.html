@@ -1,0 +1,61 @@
+<!-- Simple Web Page with Internal CSS and JavaScript -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Web Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 400px;
+            margin: 60px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            padding: 32px 24px;
+            text-align: center;
+        }
+        h1 {
+            color: #2d6cdf;
+            margin-bottom: 16px;
+        }
+        button {
+            background: #2d6cdf;
+            color: #fff;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 18px;
+           transition: background 0.2s;
+        }
+        button:hover {
+            background: #1b4e9b;
+        }
+        #message {
+            margin-top: 20px;
+            color: #333;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome!</h1>
+        <p>Click the button to see a message:</p>
+        <button onclick="showMessage()">Say Hi</button>
+        <div id="message"></div>
+    </div>
+    <script>
+        function showMessage() {
+            document.getElementById('message').textContent = "Hi there! 👋";
+        }
+     </script>
+</body>
+</html>
