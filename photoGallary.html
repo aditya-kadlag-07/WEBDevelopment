@@ -1,0 +1,291 @@
+
+
+
+
+
+
+
+
+
+
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Photo Gallery</h1>
+            <p class="subtitle">Explore beautiful moments captured in time</p>
+            
+            <div class="filter-container">
+                <button class="filter-btn active" data-filter="all">All Photos</button>
+                <button class="filter-btn" data-filter="nature">Nature</button>
+                <button class="filter-btn" data-filter="city">City</button>
+                <button class="filter-btn" data-filter="people">People</button>
+                <button class="filter-btn" data-filter="architecture">Architecture</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="gallery" id="gallery">
+            <!-- Gallery items will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-content">
+            <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+            <img class="lightbox-img" id="lightbox-img" src="" alt="">
+            <button class="lightbox-nav lightbox-prev" onclick="previousImage()">&lt;</button>
+            <button class="lightbox-nav lightbox-next" onclick="nextImage()">&gt;</button>
+            <div class="lightbox-info">
+                <div class="lightbox-title" id="lightbox-title"></div>
+                <div class="lightbox-description" id="lightbox-description"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample gallery data
+        const galleryData = [
+            {
+                id: 1,
+                title: "Mountain Sunrise",
+                category: "nature",
+                description: "A breathtaking sunrise over snow-capped mountains",
+                image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop"
+            },
+            {
+                id: 2,
+                title: "Urban Nightscape",
+                category: "city",
+                description: "City lights reflecting in the calm waters",
+                image: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&h=400&fit=crop"
+            },
+            {
+                id: 3,
+                title: "Portrait of Joy",
+                category: "people",
+                description: "Capturing genuine happiness in everyday moments",
+                image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=600&h=400&fit=crop"
+            },
+            {
+                id: 4,
+                title: "Gothic Cathedral",
+                category: "architecture",
+                description: "Ancient stonework standing the test of time",
+                image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600&h=400&fit=crop"
+            },
+            {
+                id: 5,
+                title: "Forest Path",
+                category: "nature",
+                description: "A peaceful walk through the enchanted woods",
+                image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&h=400&fit=crop"
+            },
+            {
+                id: 6,
+                title: "Street Photography",
+                category: "city",
+                description: "Life happening in the bustling city streets",
+                image: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=600&h=400&fit=crop"
+            },
+            {
+                id: 7,
+                title: "Family Moment",
+                category: "people",
+                description: "Precious family memories that last forever",
+                image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&h=400&fit=crop"
+            },
+            {
+                id: 8,
+                title: "Modern Skyscraper",
+                category: "architecture",
+                description: "Contemporary design reaching for the sky",
+                image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&h=400&fit=crop"
+            },
+            {
+                id: 9,
+                title: "Ocean Waves",
+                category: "nature",
+                description: "The powerful beauty of the sea",
+                image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&h=400&fit=crop"
+            },
+            {
+                id: 10,
+                title: "Downtown Lights",
+                category: "city",
+                description: "The city that never sleeps",
+                image: "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=600&h=400&fit=crop"
+            },
+            {
+                id: 11,
+                title: "Street Musician",
+                category: "people",
+                description: "Music bringing people together",
+                image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&h=400&fit=crop"
+            },
+            {
+                id: 12,
+                title: "Ancient Ruins",
+                category: "architecture",
+                description: "History preserved in stone",
+                image: "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=600&h=400&fit=crop"
+            }
+        ];
+
+        let currentFilter = 'all';
+        let currentImageIndex = 0;
+        let filteredData = [...galleryData];
+
+        // Initialize the gallery
+        function initGallery() {
+            renderGallery();
+            setupEventListeners();
+        }
+
+        // Render gallery items
+        function renderGallery() {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '';
+
+            filteredData.forEach((item, index) => {
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item';
+                galleryItem.style.animationDelay = `${index * 0.1}s`;
+                
+                galleryItem.innerHTML = `
+                    <img src="${item.image}" alt="${item.title}" loading="lazy">
+                    <div class="item-info">
+                        <div class="item-title">${item.title}</div>
+                        <div class="item-category">${item.category}</div>
+                        <div class="item-description">${item.description}</div>
+                    </div>
+                `;
+
+                galleryItem.addEventListener('click', () => openLightbox(index));
+                gallery.appendChild(galleryItem);
+            });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Filter buttons
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const filter = btn.getAttribute('data-filter');
+                    filterGallery(filter);
+                    
+                    // Update active button
+                    filterButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                });
+            });
+
+            // Lightbox close on background click
+            const lightbox = document.getElementById('lightbox');
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) {
+                    closeLightbox();
+                }
+            });
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (document.getElementById('lightbox').classList.contains('active')) {
+                    switch(e.key) {
+                        case 'Escape':
+                            closeLightbox();
+                            break;
+                        case 'ArrowLeft':
+                            previousImage();
+                            break;
+                        case 'ArrowRight':
+                            nextImage();
+                            break;
+                    }
+                }
+            });
+        }
+
+        // Filter gallery
+        function filterGallery(filter) {
+            currentFilter = filter;
+            
+            if (filter === 'all') {
+                filteredData = [...galleryData];
+            } else {
+                filteredData = galleryData.filter(item => item.category === filter);
+            }
+
+            // Add loading effect
+            const gallery = document.getElementById('gallery');
+            gallery.style.opacity = '0.5';
+            
+            setTimeout(() => {
+                renderGallery();
+                gallery.style.opacity = '1';
+            }, 300);
+        }
+
+        // Open lightbox
+        function openLightbox(index) {
+            currentImageIndex = index;
+            const item = filteredData[index];
+            
+            document.getElementById('lightbox-img').src = item.image;
+            document.getElementById('lightbox-title').textContent = item.title;
+            document.getElementById('lightbox-description').textContent = item.description;
+            
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.add('active');
+            
+            // Prevent body scroll
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close lightbox
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+            
+            // Restore body scroll
+            document.body.style.overflow = 'auto';
+        }
+
+        // Navigate to previous image
+        function previousImage() {
+            currentImageIndex = (currentImageIndex - 1 + filteredData.length) % filteredData.length;
+            const item = filteredData[currentImageIndex];
+            
+            document.getElementById('lightbox-img').src = item.image;
+            document.getElementById('lightbox-title').textContent = item.title;
+            document.getElementById('lightbox-description').textContent = item.description;
+        }
+
+        // Navigate to next image
+        function nextImage() {
+            currentImageIndex = (currentImageIndex + 1) % filteredData.length;
+            const item = filteredData[currentImageIndex];
+            
+            document.getElementById('lightbox-img').src = item.image;
+            document.getElementById('lightbox-title').textContent = item.title;
+            document.getElementById('lightbox-description').textContent = item.description;
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', initGallery);
+
+        // Add some fun loading animation
+        window.addEventListener('load', () => {
+            const galleryItems = document.querySelectorAll('.gallery-item');
+            galleryItems.forEach((item, index) => {
+                setTimeout(() => {
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>
