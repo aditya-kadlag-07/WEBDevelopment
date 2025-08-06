@@ -1,0 +1,290 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<body>
+    <div class="notepad-container">
+        <div class="header">
+            <h1>📝 Digital Notepad</h1>
+            <p>Create, save, and manage your notes easily</p>
+        </div>
+
+        <div class="toolbar">
+            <button class="btn btn-primary" onclick="newNote()">
+                <span class="icon">📄</span> New Note
+            </button>
+            <button class="btn btn-success" onclick="saveNote()">
+                <span class="icon">💾</span> Save
+            </button>
+            <button class="btn btn-secondary" onclick="loadNote()">
+                <span class="icon">📂</span> Load
+            </button>
+            <button class="btn btn-danger" onclick="clearNote()">
+                <span class="icon">🗑️</span> Clear
+            </button>
+            <label class="file-label">
+                <span class="icon">📁</span> Import File
+                <input type="file" class="file-input" id="fileInput" accept=".txt,.html,.js,.css,.json">
+            </label>
+            <div class="status" id="status">Ready</div>
+        </div>
+
+        <div class="editor-container">
+            <input type="text" class="filename-input" id="filenameInput" placeholder="Enter note title..." maxlength="50">
+            <textarea class="text-editor" id="textEditor" placeholder="Start typing your note here..."></textarea>
+            <div class="word-count" id="wordCount">Words: 0 | Characters: 0</div>
+        </div>
+    </div>
+
+    <div class="saved-notes">
+        <h2>📚 Saved Notes</h2>
+        <div class="notes-list" id="notesList">
+            <div class="empty-notes">No saved notes yet. Create your first note!</div>
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+        const textEditor = document.getElementById('textEditor');
+        const filenameInput = document.getElementById('filenameInput');
+        const wordCount = document.getElementById('wordCount');
+        const status = document.getElementById('status');
+        const fileInput = document.getElementById('fileInput');
+        const notesList = document.getElementById('notesList');
+
+        // Auto-save timer
+        let autoSaveTimer;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSavedNotes();
+            updateWordCount();
+            
+            // Auto-save functionality
+            textEditor.addEventListener('input', function() {
+                clearTimeout(autoSaveTimer);
+                autoSaveTimer = setTimeout(autoSave, 2000);
+                updateWordCount();
+            });
+
+            // File import functionality
+            fileInput.addEventListener('change', handleFileImport);
+        });
+
+        // Word count update
+        function updateWordCount() {
+            const text = textEditor.value;
+            const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+            const characters = text.length;
+            wordCount.textContent = `Words: ${words} | Characters: ${characters}`;
+        }
+
+        // Auto-save function
+        function autoSave() {
+            if (textEditor.value.trim() && filenameInput.value.trim()) {
+                saveNoteToStorage();
+                showStatus('Auto-saved', 'success');
+            }
+        }
+
+        // Show status message
+        function showStatus(message, type = 'info') {
+            status.textContent = message;
+            status.style.color = type === 'success' ? '#28a745' : 
+                               type === 'error' ? '#dc3545' : '#6c757d';
+            setTimeout(() => {
+                status.textContent = 'Ready';
+                status.style.color = '#6c757d';
+            }, 3000);
+        }
+
+        // New note
+        function newNote() {
+            if (confirm('Are you sure you want to create a new note? Any unsaved changes will be lost.')) {
+                textEditor.value = '';
+                filenameInput.value = '';
+                updateWordCount();
+                showStatus('New note created');
+            }
+        }
+
+        // Save note
+        function saveNote() {
+            const title = filenameInput.value.trim();
+            const content = textEditor.value.trim();
+
+            if (!title) {
+                alert('Please enter a title for your note.');
+                filenameInput.focus();
+                return;
+            }
+
+            if (!content) {
+                alert('Please enter some content for your note.');
+                textEditor.focus();
+                return;
+            }
+
+            saveNoteToStorage();
+            showStatus('Note saved successfully!', 'success');
+            loadSavedNotes();
+        }
+
+        // Save note to localStorage
+        function saveNoteToStorage() {
+            const title = filenameInput.value.trim();
+            const content = textEditor.value;
+            const timestamp = new Date().toISOString();
+            
+            const note = {
+                title: title,
+                content: content,
+                timestamp: timestamp,
+                lastModified: new Date().toISOString()
+            };
+
+            const savedNotes = JSON.parse(localStorage.getItem('notepad_notes') || '{}');
+            savedNotes[title] = note;
+            localStorage.setItem('notepad_notes', JSON.stringify(savedNotes));
+        }
+
+        // Load saved notes
+        function loadSavedNotes() {
+            const savedNotes = JSON.parse(localStorage.getItem('notepad_notes') || '{}');
+            const notes = Object.values(savedNotes);
+            
+            if (notes.length === 0) {
+                notesList.innerHTML = '<div class="empty-notes">No saved notes yet. Create your first note!</div>';
+                return;
+            }
+
+            // Sort notes by last modified date
+            notes.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+
+            notesList.innerHTML = notes.map(note => `
+                <div class="note-item" onclick="loadNoteFromStorage('${note.title}')">
+                    <div class="note-title">${note.title}</div>
+                    <div class="note-preview">${note.content.substring(0, 100)}${note.content.length > 100 ? '...' : ''}</div>
+                    <div class="note-date">Last modified: ${new Date(note.lastModified).toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+
+        // Load note from storage
+        function loadNoteFromStorage(title) {
+            const savedNotes = JSON.parse(localStorage.getItem('notepad_notes') || '{}');
+            const note = savedNotes[title];
+            
+            if (note) {
+                filenameInput.value = note.title;
+                textEditor.value = note.content;
+                updateWordCount();
+                showStatus(`Loaded: ${note.title}`);
+            }
+        }
+
+        // Load note (general function)
+        function loadNote() {
+            const savedNotes = JSON.parse(localStorage.getItem('notepad_notes') || '{}');
+            const titles = Object.keys(savedNotes);
+            
+            if (titles.length === 0) {
+                alert('No saved notes found.');
+                return;
+            }
+
+            const title = prompt('Enter the title of the note to load:\n\nAvailable notes:\n' + titles.join('\n'));
+            
+            if (title && savedNotes[title]) {
+                loadNoteFromStorage(title);
+            }
+        }
+
+        // Clear note
+        function clearNote() {
+            if (confirm('Are you sure you want to clear the current note?')) {
+                textEditor.value = '';
+                filenameInput.value = '';
+                updateWordCount();
+                showStatus('Note cleared');
+            }
+        }
+
+        // Handle file import
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                textEditor.value = content;
+                filenameInput.value = file.name.replace(/\.[^/.]+$/, ""); // Remove file extension
+                updateWordCount();
+                showStatus(`Imported: ${file.name}`);
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + S to save
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                saveNote();
+            }
+            
+            // Ctrl/Cmd + N for new note
+            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                e.preventDefault();
+                newNote();
+            }
+        });
+
+        // Export functionality (bonus feature)
+        function exportNote() {
+            const title = filenameInput.value.trim();
+            const content = textEditor.value;
+            
+            if (!title || !content) {
+                alert('Please enter both title and content before exporting.');
+                return;
+            }
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${title}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showStatus('Note exported successfully!', 'success');
+        }
+
+        // Add export button to toolbar
+        const toolbar = document.querySelector('.toolbar');
+        const exportBtn = document.createElement('button');
+        exportBtn.className = 'btn btn-secondary';
+        exportBtn.innerHTML = '<span class="icon">📤</span> Export';
+        exportBtn.onclick = exportNote;
+        toolbar.insertBefore(exportBtn, toolbar.querySelector('.status'));
+    </script>
+</body>
+</html> 
