@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: white;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #00d4ff, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        .nav-links a:hover {
+            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Main Container */
+        .main-container {
+            margin-top: 80px;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+            min-height: calc(100vh - 80px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            padding: 2rem 1rem;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            padding: 1rem;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu a:hover {
+            background: rgba(0, 212, 255, 0.1);
+            color: #00d4ff;
+            transform: translateX(10px);
+        }
+
+        .sidebar-menu a.active {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+        }
+
+        .menu-icon {
+            font-size: 1.2rem;
+        }
+
+        /* Dashboard Content */
+        .dashboard-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Header Section */
+        .header-section {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .welcome-text {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #00d4ff, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 212, 255, 0.2);
+            border-color: #00d4ff;
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #00d4ff, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #00d4ff;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+        }
+
+        /* Charts Section */
+        .charts-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 212, 255, 0.2);
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #00d4ff;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Bar Chart */
+        .bar-chart {
+            display: flex;
+            align-items: end;
+            justify-content: space-around;
+            height: 100%;
+            padding: 1rem 0;
+        }
+
+        .bar {
+            width: 40px;
+            background: linear-gradient(to top, #00d4ff, #0099cc);
+            border-radius: 5px 5px 0 0;
+            transition: all 0.5s ease;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .bar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00d4ff;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        /* Pie Chart */
+        .pie-chart {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #00d4ff 0deg 120deg,
+                #ffd700 120deg 240deg,
+                #ff6b6b 240deg 360deg
+            );
+            margin: 0 auto;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .pie-chart:hover {
+            transform: scale(1.1);
+        }
+
+        .pie-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .pie-legend {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .legend-color.blue { background: #00d4ff; }
+        .legend-color.yellow { background: #ffd700; }
+        .legend-color.red { background: #ff6b6b; }
+
+        /* Recent Activity */
+        .activity-section {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            padding: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #00d4ff;
+        }
+
+        .activity-list {
+            list-style: none;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .activity-item:hover {
+            background: rgba(0, 212, 255, 0.1);
+            transform: translateX(10px);
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .activity-icon.blue { background: rgba(0, 212, 255, 0.2); color: #00d4ff; }
+        .activity-icon.green { background: rgba(76, 175, 80, 0.2); color: #4CAF50; }
+        .activity-icon.orange { background: rgba(255, 152, 0, 0.2); color: #FF9800; }
+
+        .activity-details h4 {
+            color: white;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-details p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .activity-time {
+            margin-left: auto;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+        }
+
+        /* Animations */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .animate-slide-up {
+            animation: slideInUp 0.8s ease-out forwards;
+        }
+
+        .animate-slide-left {
+            animation: slideInLeft 0.8s ease-out forwards;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: static;
+                order: 2;
+            }
+            
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .navbar {
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 212, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #00d4ff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">🚀 Dashboard</div>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#analytics">Analytics</a></li>
+            <li><a href="#reports">Reports</a></li>
+            <li><a href="#settings">Settings</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar animate-slide-left">
+            <ul class="sidebar-menu">
+                <li><a href="#dashboard" class="active"><span class="menu-icon">��</span> Dashboard</a></li>
+                <li><a href="#users"><span class="menu-icon">��</span> Users</a></li>
+                <li><a href="#products"><span class="menu-icon">��</span> Products</a></li>
+                <li><a href="#orders"><span class="menu-icon">🛒</span> Orders</a></li>
+                <li><a href="#analytics"><span class="menu-icon">��</span> Analytics</a></li>
+                <li><a href="#reports"><span class="menu-icon">📋</span> Reports</a></li>
+                <li><a href="#settings"><span class="menu-icon">⚙️</span> Settings</a></li>
+            </ul>
+        </aside>
+
+        <!-- Dashboard Content -->
+        <main class="dashboard-content">
+            <!-- Header Section -->
+            <section class="header-section animate-slide-up">
+                <h1 class="welcome-text">Welcome Back, Admin! 👋</h1>
+                <p class="subtitle">Here's what's happening with your business today</p>
+            </section>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card animate-slide-up" style="animation-delay: 0.1s;">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-number" data-target="1250">0</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                
+                <div class="stat-card animate-slide-up" style="animation-delay: 0.2s;">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-number" data-target="45600">0</div>
+                    <div class="stat-label">Revenue</div>
+                </div>
+                
+                <div class="stat-card animate-slide-up" style="animation-delay: 0.3s;">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-number" data-target="89">0</div>
+                    <div class="stat-label">Products</div>
+                </div>
+                
+                <div class="stat-card animate-slide-up" style="animation-delay: 0.4s;">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-number" data-target="23">0</div>
+                    <div class="stat-label">Growth %</div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section">
+                <div class="chart-card animate-slide-up" style="animation-delay: 0.5s;">
+                    <h3 class="chart-title">Monthly Sales</h3>
+                    <div class="chart-container">
+                        <div class="bar-chart">
+                            <div class="bar" style="height: 60%;" data-value="60">
+                                <div class="bar-value">60</div>
+                                <div class="bar-label">Jan</div>
+                            </div>
+                            <div class="bar" style="height: 80%;" data-value="80">
+                                <div class="bar-value">80</div>
+                                <div class="bar-label">Feb</div>
+                            </div>
+                            <div class="bar" style="height: 45%;" data-value="45">
+                                <div class="bar-value">45</div>
+                                <div class="bar-label">Mar</div>
+                            </div>
+                            <div class="bar" style="height: 90%;" data-value="90">
+                                <div class="bar-value">90</div>
+                                <div class="bar-label">Apr</div>
+                            </div>
+                            <div class="bar" style="height: 75%;" data-value="75">
+                                <div class="bar-value">75</div>
+                                <div class="bar-label">May</div>
+                            </div>
+                            <div class="bar" style="height: 95%;" data-value="95">
+                                <div class="bar-value">95</div>
+                                <div class="bar-label">Jun</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card animate-slide-up" style="animation-delay: 0.6s;">
+                    <h3 class="chart-title">Revenue Distribution</h3>
+                    <div class="chart-container">
+                        <div class="pie-chart">
+                            <div class="pie-center">$45.6K</div>
+                        </div>
+                        <div class="pie-legend">
+                            <div class="legend-item">
+                                <div class="legend-color blue"></div>
+                                <span>Products (40%)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color yellow"></div>
+                                <span>Services (33%)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color red"></div>
+                                <span>Other (27%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <section class="activity-section animate-slide-up" style="animation-delay: 0.7s;">
+                <h3 class="section-title">Recent Activity</h3>
+                <ul class="activity-list">
+                    <li class="activity-item">
+                        <div class="activity-icon blue">📊</div>
+                        <div class="activity-details">
+                            <h4>New user registered</h4>
+                            <p>John Doe joined the platform</p>
+                        </div>
+                        <div class="activity-time">2 min ago</div>
+                    </li>
+                    
+                    <li class="activity-item">
+                        <div class="activity-icon green">💰</div>
+                        <div class="activity-details">
+                            <h4>Payment received</h4>
+                            <p>Order #1234 completed</p>
+                        </div>
+                        <div class="activity-time">15 min ago</div>
+                    </li>
+                    
+                    <li class="activity-item">
+                        <div class="activity-icon orange">📦</div>
+                        <div class="activity-details">
+                            <h4>Product updated</h4>
+                            <p>iPhone 15 Pro stock updated</p>
+                        </div>
+                        <div class="activity-time">1 hour ago</div>
+                    </li>
+                    
+                    <li class="activity-item">
+                        <div class="activity-icon blue">📈</div>
+                        <div class="activity-details">
+                            <h4>Analytics report</h4>
+                            <p>Monthly report generated</p>
+                        </div>
+                        <div class="activity-time">2 hours ago</div>
+                    </li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Animate numbers in stat cards
+        function animateNumbers() {
+            const numbers = document.querySelectorAll('.stat-number');
+            
+            numbers.forEach(number => {
+                const target = parseInt(number.getAttribute('data-target'));
+                const duration = 2000;
+                const step = target / (duration / 16);
+                let current = 0;
+                
+                const timer = setInterval(() => {
+                    current += step;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    number.textContent = Math.floor(current);
+                }, 16);
+            });
+        }
+
+        // Animate bars on scroll
+        function animateBars() {
+            const bars = document.querySelectorAll('.bar');
+            
+            bars.forEach((bar, index) => {
+                setTimeout(() => {
+                    bar.style.height = bar.getAttribute('data-value') + '%';
+                }, index * 200);
+            });
+        }
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all animated elements
+        document.querySelectorAll('.animate-slide-up, .animate-slide-left').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Add hover effects to stat cards
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Add click effects to sidebar menu
+        document.querySelectorAll('.sidebar-menu a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all links
+                document.querySelectorAll('.sidebar-menu a').forEach(l => l.classList.remove('active'));
+                
+                // Add active class to clicked link
+                this.classList.add('active');
+                
+                // Add ripple effect
+                const ripple = document.createElement('span');
+                ripple.style.position = 'absolute';
+                ripple.style.borderRadius = '50%';
+                ripple.style.background = 'rgba(0, 212, 255, 0.3)';
+                ripple.style.transform = 'scale(0)';
+                ripple.style.animation = 'ripple 0.6s linear';
+                ripple.style.pointerEvents = 'none';
+                
+                this.style.position = 'relative';
+                this.appendChild(ripple);
+                
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // Add ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize animations when page loads
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                animateNumbers();
+                animateBars();
+            }, 500);
+        });
+
+        // Add scroll animations
+        window.addEventListener('scroll', function() {
+            const scrolled = window.pageYOffset;
+            const parallax = document.querySelector('.header-section');
+            const speed = scrolled * 0.5;
+            
+            if (parallax) {
+                parallax.style.transform = `translateY(${speed}px)`;
+            }
+        });
+
+        // Add real-time updates simulation
+        setInterval(() => {
+            const randomCard = document.querySelectorAll('.stat-card')[Math.floor(Math.random() * 4)];
+            const number = randomCard.querySelector('.stat-number');
+            const currentValue = parseInt(number.textContent);
+            const newValue = currentValue + Math.floor(Math.random() * 10);
+            
+            number.style.color = '#ffd700';
+            number.textContent = newValue;
+            
+            setTimeout(() => {
+                number.style.color = '#00d4ff';
+            }, 1000);
+        }, 5000);
+
+        // Add chart interactions
+        document.querySelectorAll('.bar').forEach(bar => {
+            bar.addEventListener('click', function() {
+                const value = this.getAttribute('data-value');
+                const label = this.querySelector('.bar-label').textContent;
+                
+                // Show tooltip or highlight
+                this.style.boxShadow = '0 0 20px rgba(0, 212, 255, 0.6)';
+                this.style.transform = 'scale(1.2)';
+                
+                setTimeout(() => {
+                    this.style.boxShadow = '';
+                    this.style.transform = 'scale(1.1)';
+                }, 1000);
+            });
+        });
+
+        // Add responsive sidebar toggle for mobile
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('show');
+        }
+
+        // Add mobile menu button
+        const mobileMenuBtn = document.createElement('button');
+        mobileMenuBtn.innerHTML = '☰';
+        mobileMenuBtn.style.cssText = `
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        `;
+        
+        if (window.innerWidth <= 768) {
+            document.querySelector('.navbar').appendChild(mobileMenuBtn);
+            mobileMenuBtn.addEventListener('click', toggleSidebar);
+        }
+
+        // Add window resize handler
+        window.addEventListener('resize', function() {
+            if (window.innerWidth <= 768) {
+                if (!document.querySelector('.mobile-menu-btn')) {
+                    document.querySelector('.navbar').appendChild(mobileMenuBtn);
+                }
+            } else {
+                const btn = document.querySelector('.mobile-menu-btn');
+                if (btn) btn.remove();
+            }
+        });
+    </script>
+</body>
+</html>
