@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Car Collection</title>
+
+  <style>
+    /* ===== Global Styles ===== */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      text-align: center;
+      padding: 30px 10px;
+      background: #1a1a1a;
+      color: #ffcc00;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2.2rem;
+      letter-spacing: 1px;
+    }
+
+    /* ===== Search & Sort Bar ===== */
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      padding: 20px;
+      background: #222;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      width: 250px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    select {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    /* ===== Car Grid ===== */
+    .car-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      padding: 30px;
+    }
+
+    .car-card {
+      background: #2a2a2a;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+
+    .car-card:hover {
+      transform: translateY(-8px);
+    }
+
+    .car-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .car-details {
+      padding: 15px;
+    }
+
+    .car-details h2 {
+      margin: 5px 0;
+      font-size: 20px;
+      color: #ffcc00;
+    }
+
+    .car-details p {
+      margin: 5px 0;
+      color: #ddd;
+    }
+
+    .price {
+      font-size: 18px;
+      color: #00e676;
+      font-weight: bold;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 1.5rem;
+      }
+
+      .controls {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>🚗 My Car Collection</h1>
+  </header>
+
+  <div class="controls">
+    <input type="text" id="searchInput" placeholder="Search cars by name...">
+    <select id="sortSelect">
+      <option value="default">Sort by</option>
+      <option value="asc">Price: Low to High</option>
+      <option value="desc">Price: High to Low</option>
+    </select>
+  </div>
+
+  <div class="car-container" id="carContainer">
+    <!-- Dynamic car cards will appear here -->
+  </div>
+
+  <script>
+    // ===== Car Data =====
+    const cars = [
+      {
+        name: "Tata Nexon EV",
+        price: 1499000,
+        image: "https://stimg.cardekho.com/images/carexteriorimages/930x620/Tata/Nexon-EV/11360/1725623216577/front-left-side-47.jpg"
+      },
+      {
+        name: "Mahindra XUV700",
+        price: 2499000,
+        image: "https://stimg.cardekho.com/images/carexteriorimages/930x620/Mahindra/XUV700/11786/1718286377829/front-left-side-47.jpg"
+      },
+      {
+        name: "Hyundai Creta",
+        price: 1599000,
+        image: "https://stimg.cardekho.com/images/carexteriorimages/930x620/Hyundai/Creta/11341/1704705025222/front-left-side-47.jpg"
+      },
+      {
+        name: "Kia Seltos",
+        price: 1849000,
+        image: "https://stimg.cardekho.com/images/carexteriorimages/930x620/Kia/Seltos/11623/1704787392745/front-left-side-47.jpg"
+      },
+      {
+        name: "Maruti Suzuki Swift",
+        price: 899000,
+        image: "https://stimg.cardekho.com/images/carexteriorimages/930x620/Maruti/Swift/11604/1714647076786/front-left-side-47.jpg"
+      },
+      {
+        name: "Toyota Fortuner",
+        price: 3899000,
+        image: "https://stimg.cardekho.com/images/carexteriorimages/930x620/Toyota/Fortuner/11783/1718287075811/front-left-side-47.jpg"
+      },
+      {
+        name: "BMW X5",
+        price: 9990000,
+        image: "https://stimg.cardekho.com/images/carexteriorimages/930x620/BMW/X5/11614/1716544847812/front-left-side-47.jpg"
+      },
+      {
+        name: "Mercedes-Benz GLC",
+        price: 7500000,
+        image: "https://stimg.cardekho.com/images/carexteriorimages/930x620/Mercedes-Benz/GLC/11294/1691228262175/front-left-side-47.jpg"
+      }
+    ];
+
+    const carContainer = document.getElementById('carContainer');
+    const searchInput = document.getElementById('searchInput');
+    const sortSelect = document.getElementById('sortSelect');
+
+    // ===== Function to Display Cars =====
+    function displayCars(carList) {
+      carContainer.innerHTML = "";
+      carList.forEach(car => {
+        const card = document.createElement('div');
+        card.classList.add('car-card');
+        card.innerHTML = `
+          <img src="${car.image}" alt="${car.name}">
+          <div class="car-details">
+            <h2>${car.name}</h2>
+            <p class="price">₹${car.price.toLocaleString('en-IN')}</p>
+          </div>
+        `;
+        carContainer.appendChild(card);
+      });
+    }
+
+    // ===== Search Function =====
+    searchInput.addEventListener('input', () => {
+      const query = searchInput.value.toLowerCase();
+      const filtered = cars.filter(car => car.name.toLowerCase().includes(query));
+      displayCars(filtered);
+    });
+
+    // ===== Sort Function =====
+    sortSelect.addEventListener('change', () => {
+      let sortedCars = [...cars];
+      if (sortSelect.value === 'asc') {
+        sortedCars.sort((a, b) => a.price - b.price);
+      } else if (sortSelect.value === 'desc') {
+        sortedCars.sort((a, b) => b.price - a.price);
+      }
+      displayCars(sortedCars);
+    });
+
+    // ===== Initial Display =====
+    displayCars(cars);
+  </script>
+</body>
+</html>
